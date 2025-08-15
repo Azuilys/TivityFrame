@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TivityFrame - AI Thought Organizer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #5a7bff;
+            --primary-light: #8aa1ff;
+            --primary-dark: #3d5bdb;
+            --accent: #ff7eb3;
+            --accent-light: #ffb1d0;
+            --background: #f8f9ff;
+            --card: #ffffff;
+            --text: #4a5568;
+            --text-light: #718096;
+            --success: #48bb78;
+            --warning: #ecc94b;
+            --danger: #f56565;
+            --shadow: rgba(90, 123, 255, 0.15);
+            --shadow-dark: rgba(90, 123, 255, 0.25);
+            --radius: 24px;
+            --radius-sm: 16px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #f0f4ff, #e6f0ff);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Background animation */
+        .bubbles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-light), var(--accent-light));
+            opacity: 0.1;
+            animation: float 15s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            25% { transform: translateY(-20px) translateX(10px); }
+            50% { transform: translateY(20px) translateX(-10px); }
+            75% { transform: translateY(-10px) translateX(-20px); }
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .logo i {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .nav-btn {
+            background: var(--card);
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px var(--shadow);
+            transition: var(--transition);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px var(--shadow-dark);
+        }
+
+        /* Main content */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Thought input section */
+        .thought-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .category-selector {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        
+        .category-btn {
+            background: rgba(90, 123, 255, 0.1);
+            border: none;
+            border-radius: 50px;
+            padding: 8px 16px;
+            color: var(--primary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .category-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .category-btn:hover {
+            background: rgba(90, 123, 255, 0.2);
+        }
+
+        .thought-bubble {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 30px;
+            box-shadow: 0 8px 24px var(--shadow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            animation: bubbleFloat 8s infinite ease-in-out;
+        }
+
+        @keyframes bubbleFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .thought-text {
+            font-size: 1.4rem;
+            text-align: center;
+            color: var(--text-light);
+            padding: 40px 0;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .thought-text:hover {
+            color: var(--primary);
+        }
+
+        .thought-input {
+            width: 100%;
+            height: 150px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1.2rem;
+            color: var(--text);
+            border: none;
+            resize: none;
+            outline: none;
+            padding: 15px;
+            background: transparent;
+            transition: var(--transition);
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(90, 123, 255, 0.1);
+        }
+
+        .thought-input:focus {
+            background: rgba(90, 123, 255, 0.03);
+            border-color: var(--primary-light);
+        }
+
+        .thought-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border-radius: 50px;
+            border: none;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px var(--shadow-dark);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary-light);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: rgba(90, 123, 255, 0.05);
+        }
+
+        /* Stats section */
+        .stats-section {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            flex: 1;
+            min-width: 150px;
+            background: var(--card);
+            border-radius: var(--radius-sm);
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 5px 0;
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 0.85rem;
+        }
+
+        /* Guidance section */
+        .guidance-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .guidance-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 25px;
+            box-shadow: 0 8px 24px var(--shadow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            animation: bubbleFloat 10s infinite ease-in-out;
+        }
+
+        .guidance-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .guidance-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-light), var(--accent-light));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .guidance-title {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .guidance-content {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: var(--text);
+            margin-bottom: 15px;
+        }
+
+        .guidance-prompt {
+            background: rgba(90, 123, 255, 0.05);
+            border-left: 4px solid var(--primary);
+            padding: 12px;
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            margin: 10px 0;
+            font-style: italic;
+            color: var(--text);
+            transition: all 0.5s ease;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+        }
+
+        .spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(90, 123, 255, 0.1);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .guidance-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        /* History section */
+        .history-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            grid-column: 1 / -1;
+            margin-top: 20px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 5px;
+        }
+
+        .history-item {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 18px;
+            box-shadow: 0 4px 12px var(--shadow);
+            transition: var(--transition);
+            position: relative;
+            border-left: 4px solid var(--primary-light);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .history-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px var(--shadow);
+        }
+
+        .history-date {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-bottom: 8px;
+        }
+
+        .history-content {
+            font-size: 1rem;
+            line-height: 1.5;
+            margin-bottom: 10px;
+            flex-grow: 1;
+        }
+
+        .history-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            background: rgba(90, 123, 255, 0.1);
+            color: var(--primary);
+            padding: 3px 10px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1rem;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .edit-btn {
+            color: var(--primary);
+        }
+
+        .edit-btn:hover {
+            background: rgba(90, 123, 255, 0.1);
+        }
+
+        .delete-btn {
+            color: var(--danger);
+        }
+
+        .delete-btn:hover {
+            background: rgba(245, 101, 101, 0.1);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-top: 20px;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            .history-list {
+                grid-template-columns: 1fr;
+            }
+            .stats-section {
+                flex-direction: column;
+            }
+            .thought-input {
+                height: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background bubbles -->
+    <div class="bubbles">
+        <div class="bubble" style="width: 120px; height: 120px; top: 10%; left: 5%; animation-delay: 0s;"></div>
+        <div class="bubble" style="width: 80px; height: 80px; top: 25%; left: 80%; animation-delay: 1s;"></div>
+        <div class="bubble" style="width: 60px; height: 60px; top: 60%; left: 15%; animation-delay: 2s;"></div>
+        <div class="bubble" style="width: 100px; height: 100px; top: 70%; left: 75%; animation-delay: 3s;"></div>
+        <div class="bubble" style="width: 50px; height: 50px; top: 40%; left: 50%; animation-delay: 4s;"></div>
+    </div>
+    
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-brain"></i>
+                <span>TivityFrame</span>
+            </div>
+            <div class="nav-buttons">
+                <button class="nav-btn" id="settingsBtn" title="Settings">
+                    <i class="fas fa-cog"></i>
+                </button>
+                <button class="nav-btn" id="profileBtn" title="Your Profile">
+                    <i class="fas fa-user"></i>
+                </button>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Thought Input Section -->
+            <section class="thought-section">
+                <h2 class="section-title">
+                    <i class="fas fa-lightbulb"></i>
+                    Capture Your Thoughts
+                </h2>
+                
+                <div class="category-selector">
+                    <button class="category-btn active" data-category="work">Work</button>
+                    <button class="category-btn" data-category="personal">Personal</button>
+                    <button class="category-btn" data-category="idea">Idea</button>
+                    <button class="category-btn" data-category="goal">Goal</button>
+                    <button class="category-btn" data-category="reflection">Reflection</button>
+                </div>
+                
+                <div class="thought-bubble">
+                    <textarea class="thought-input" id="thoughtInput" placeholder="What's on your mind today?"></textarea>
+                    <div class="thought-actions">
+                        <button class="btn btn-outline" id="discardBtn">
+                            <i class="fas fa-trash"></i>
+                            Clear
+                        </button>
+                        <button class="btn btn-primary" id="saveBtn">
+                            <i class="fas fa-save"></i>
+                            Save
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="stats-section">
+                    <div class="stat-card">
+                        <i class="fas fa-brain" style="font-size: 1.2rem; color: var(--primary);"></i>
+                        <div class="stat-value" id="thoughtCount">0</div>
+                        <div class="stat-label">Thoughts</div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-check-circle" style="font-size: 1.2rem; color: var(--success);"></i>
+                        <div class="stat-value" id="resolvedCount">0</div>
+                        <div class="stat-label">Resolved</div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-lightbulb" style="font-size: 1.2rem; color: var(--accent);"></i>
+                        <div class="stat-value" id="insightCount">0</div>
+                        <div class="stat-label">Insights</div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Guidance Section -->
+            <section class="guidance-container">
+                <h2 class="section-title">
+                    <i class="fas fa-hands-helping"></i>
+                    Thoughtful Guidance
+                </h2>
+                
+                <div class="guidance-card">
+                    <div class="guidance-header">
+                        <div class="guidance-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="guidance-title">Personalized Prompts</div>
+                    </div>
+                    <div class="guidance-content">
+                        Based on your input, here are some questions to explore your thoughts:
+                    </div>
+                    <div class="guidance-prompt" id="dynamicPrompt">
+                        Start typing to receive personalized guidance...
+                    </div>
+                    
+                    <div class="spinner" id="promptSpinner"></div>
+                    
+                    <div class="guidance-actions">
+                        <button class="btn btn-outline" id="newPromptBtn">
+                            <i class="fas fa-sync"></i>
+                            New Prompt
+                        </button>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- History Section -->
+            <section class="history-section">
+                <div class="history-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-clock"></i>
+                        Recent Thoughts
+                    </h2>
+                    <div>
+                        <select id="filterSelect" class="category-btn" style="padding: 6px 12px;">
+                            <option value="all">All</option>
+                            <option value="work">Work</option>
+                            <option value="personal">Personal</option>
+                            <option value="idea">Ideas</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="history-list" id="historyList">
+                    <!-- History items will be dynamically added here -->
+                </div>
+            </section>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="footer">
+            TivityFrame - Organize your thoughts, unlock insights, and take action
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const thoughtInput = document.getElementById('thoughtInput');
+            const dynamicPrompt = document.getElementById('dynamicPrompt');
+            const saveBtn = document.getElementById('saveBtn');
+            const discardBtn = document.getElementById('discardBtn');
+            const historyList = document.getElementById('historyList');
+            const newPromptBtn = document.getElementById('newPromptBtn');
+            const categoryBtns = document.querySelectorAll('.category-btn');
+            const filterSelect = document.getElementById('filterSelect');
+            const thoughtCount = document.getElementById('thoughtCount');
+            const resolvedCount = document.getElementById('resolvedCount');
+            const insightCount = document.getElementById('insightCount');
+            const promptSpinner = document.getElementById('promptSpinner');
+            
+            // Current state
+            let thoughts = JSON.parse(localStorage.getItem('tivityframe_thoughts')) || [];
+            let statsData = JSON.parse(localStorage.getItem('tivityframe_stats')) || {
+                total: 0,
+                resolved: 0,
+                insights: 0
+            };
+            let currentCategory = 'work';
+            let thoughtId = thoughts.length > 0 ? Math.max(...thoughts.map(t => t.id)) + 1 : 1;
+            let editingId = null;
+            
+            // Initialize the app
+            initApp();
+            
+            function initApp() {
+                updateStats();
+                loadHistory();
+                setupEventListeners();
+                createBubbles();
+            }
+            
+            function setupEventListeners() {
+                // Category selection
+                categoryBtns.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        categoryBtns.forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+                        currentCategory = this.getAttribute('data-category');
+                        generateGuidancePrompt();
+                    });
+                });
+                
+                // Discard thought
+                discardBtn.addEventListener('click', function() {
+                    thoughtInput.value = '';
+                    dynamicPrompt.textContent = "Start typing to receive personalized guidance...";
+                    editingId = null;
+                });
+                
+                // Save thought
+                saveBtn.addEventListener('click', saveThought);
+                
+                // New prompt button
+                newPromptBtn.addEventListener('click', generateGuidancePrompt);
+                
+                // Filter history
+                filterSelect.addEventListener('change', loadHistory);
+                
+                // AI Prompt on typing
+                thoughtInput.addEventListener('input', function() {
+                    clearTimeout(typingTimer);
+                    if (thoughtInput.value.trim()) {
+                        typingTimer = setTimeout(generateGuidancePrompt, 800);
+                    }
+                });
+            }
+            
+            // Load history
+            function loadHistory() {
+                historyList.innerHTML = '';
+                
+                const filterValue = filterSelect.value;
+                const filteredThoughts = filterValue === 'all' 
+                    ? thoughts 
+                    : thoughts.filter(thought => thought.tags.includes(filterValue));
+                
+                if (filteredThoughts.length === 0) {
+                    historyList.innerHTML = `
+                        <div style="text-align: center; padding: 20px; color: var(--text-light); grid-column: 1 / -1;">
+                            <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                            <h3>No thoughts yet</h3>
+                            <p>Your thoughts will appear here</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                filteredThoughts.slice(0, 6).forEach(item => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'history-item';
+                    historyItem.innerHTML = `
+                        <div class="history-date">${item.date}</div>
+                        <div class="history-content">${item.content}</div>
+                        <div class="history-footer">
+                            <div class="history-tags">
+                                <span class="tag">${item.tags[0]}</span>
+                            </div>
+                            <div class="action-buttons">
+                                <button class="action-btn edit-btn" data-id="${item.id}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn delete-btn" data-id="${item.id}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    historyList.appendChild(historyItem);
+                    
+                    // Add event listeners to action buttons
+                    const editBtn = historyItem.querySelector('.edit-btn');
+                    const deleteBtn = historyItem.querySelector('.delete-btn');
+                    
+                    editBtn.addEventListener('click', function() {
+                        const id = parseInt(this.getAttribute('data-id'));
+                        editThought(id);
+                    });
+                    
+                    deleteBtn.addEventListener('click', function() {
+                        const id = parseInt(this.getAttribute('data-id'));
+                        deleteThought(id);
+                    });
+                });
+            }
+            
+            // Edit thought
+            function editThought(id) {
+                const thought = thoughts.find(t => t.id === id);
+                if (!thought) return;
+                
+                // Load thought into input
+                thoughtInput.value = thought.content;
+                editingId = id;
+                
+                // Activate the category
+                categoryBtns.forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.getAttribute('data-category') === thought.tags[0]) {
+                        btn.classList.add('active');
+                        currentCategory = thought.tags[0];
+                    }
+                });
+                
+                // Scroll to input
+                thoughtInput.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                thoughtInput.focus();
+                
+                // Generate guidance prompt
+                generateGuidancePrompt();
+            }
+            
+            // Delete thought
+            function deleteThought(id) {
+                thoughts = thoughts.filter(t => t.id !== id);
+                statsData.total = Math.max(0, statsData.total - 1);
+                localStorage.setItem('tivityframe_thoughts', JSON.stringify(thoughts));
+                updateStats();
+                loadHistory();
+            }
+            
+            // Update stats
+            function updateStats() {
+                thoughtCount.textContent = statsData.total;
+                resolvedCount.textContent = statsData.resolved;
+                insightCount.textContent = statsData.insights;
+                localStorage.setItem('tivityframe_stats', JSON.stringify(statsData));
+            }
+            
+            // Generate guidance prompt
+            function generateGuidancePrompt() {
+                const content = thoughtInput.value.trim();
+                if (!content) {
+                    dynamicPrompt.textContent = "Start typing to receive personalized guidance...";
+                    return;
+                }
+                
+                promptSpinner.style.display = 'block';
+                dynamicPrompt.textContent = "Thinking about your thoughts...";
+                
+                setTimeout(() => {
+                    promptSpinner.style.display = 'none';
+                    
+                    const context = analyzeThoughtContent(content);
+                    const prompts = getGuidancePrompts(context);
+                    const randomIndex = Math.floor(Math.random() * prompts.length);
+                    
+                    dynamicPrompt.textContent = prompts[randomIndex];
+                    dynamicPrompt.style.opacity = '0';
+                    setTimeout(() => {
+                        dynamicPrompt.style.transition = 'opacity 0.5s ease';
+                        dynamicPrompt.style.opacity = '1';
+                    }, 10);
+                }, 800);
+            }
+            
+            // Analyze thought content
+            function analyzeThoughtContent(content) {
+                const analysis = {
+                    emotion: '',
+                    topic: '',
+                    category: currentCategory
+                };
+                
+                // Detect emotion
+                const emotionWords = {
+                    positive: ['happy', 'excited', 'grateful', 'hopeful', 'proud', 'joy', 'love', 'calm', 'content'],
+                    negative: ['stressed', 'anxious', 'angry', 'sad', 'frustrated', 'overwhelmed', 'tired', 'worried', 'stuck']
+                };
+                
+                for (const emotion in emotionWords) {
+                    for (const word of emotionWords[emotion]) {
+                        if (content.toLowerCase().includes(word)) {
+                            analysis.emotion = word;
+                            break;
+                        }
+                    }
+                    if (analysis.emotion) break;
+                }
+                
+                // Detect topic
+                const topics = ['work', 'project', 'family', 'friend', 'relationship', 'goal', 
+                               'idea', 'health', 'money', 'time', 'stress', 'deadline', 'creative', 'balance'];
+                for (const topic of topics) {
+                    if (content.toLowerCase().includes(topic)) {
+                        analysis.topic = topic;
+                        break;
+                    }
+                }
+                
+                return analysis;
+            }
+            
+            // Get guidance prompts based on context
+            function getGuidancePrompts(context) {
+                const basePrompts = [
+                    "What's the core feeling behind this thought?",
+                    "How does this relate to your broader goals?",
+                    "What would be a helpful next step here?",
+                    "What might be a different perspective to consider?"
+                ];
+                
+                const categoryPrompts = {
+                    work: [
+                        "How does this relate to your professional growth?",
+                        "What resources could help with this work challenge?",
+                        "How might this situation improve your skills?",
+                        "What's the most important aspect to focus on?"
+                    ],
+                    personal: [
+                        "How does this affect your personal well-being?",
+                        "What boundaries might be helpful here?",
+                        "How can you practice self-care in this situation?",
+                        "What values are important in this context?"
+                    ],
+                    idea: [
+                        "How could you develop this idea further?",
+                        "What's the most exciting aspect of this idea?",
+                        "Who might benefit from this idea?",
+                        "What's the first step to explore this idea?"
+                    ],
+                    goal: [
+                        "What makes this goal meaningful to you?",
+                        "What's a small step you could take today?",
+                        "How will you measure progress?",
+                        "What resources do you need to achieve this?"
+                    ],
+                    reflection: [
+                        "What patterns do you notice in your reflections?",
+                        "How have you grown from similar experiences?",
+                        "What wisdom would you share with someone else?",
+                        "What gratitude can you find in this situation?"
+                    ]
+                };
+                
+                let prompts = [...basePrompts];
+                
+                if (categoryPrompts[context.category]) {
+                    prompts = prompts.concat(categoryPrompts[context.category]);
+                }
+                
+                if (context.emotion) {
+                    prompts.push(`Since you're feeling ${context.emotion}, what might help?`);
+                    prompts.push(`How can you honor your feeling of ${context.emotion}?`);
+                    prompts.push(`What's behind this feeling of ${context.emotion}?`);
+                }
+                
+                if (context.topic) {
+                    prompts.push(`What's most important about ${context.topic} right now?`);
+                    prompts.push(`How could you approach ${context.topic} differently?`);
+                    prompts.push(`What new perspective could you bring to ${context.topic}?`);
+                }
+                
+                // Add highly personalized prompts
+                if (context.emotion && context.topic) {
+                    prompts.push(`How is your feeling of ${context.emotion} connected to ${context.topic}?`);
+                    prompts.push(`What would help transform your ${context.emotion} feeling about ${context.topic}?`);
+                }
+                
+                return prompts;
+            }
+            
+            // Save thought
+            function saveThought() {
+                const content = thoughtInput.value.trim();
+                
+                if (content) {
+                    if (editingId) {
+                        // Update existing thought
+                        const thoughtIndex = thoughts.findIndex(t => t.id === editingId);
+                        if (thoughtIndex !== -1) {
+                            thoughts[thoughtIndex].content = content;
+                            thoughts[thoughtIndex].tags = [currentCategory];
+                            thoughts[thoughtIndex].date = new Date().toLocaleString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                hour: 'numeric',
+                                minute: 'numeric'
+                            });
+                        }
+                        editingId = null;
+                    } else {
+                        // Create new thought
+                        const newItem = {
+                            id: thoughtId++,
+                            date: new Date().toLocaleString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                hour: 'numeric',
+                                minute: 'numeric'
+                            }),
+                            content: content,
+                            tags: [currentCategory],
+                            resolved: false
+                        };
+                        thoughts.unshift(newItem);
+                        statsData.total++;
+                        
+                        if (thoughts.length % 3 === 0) {
+                            statsData.insights++;
+                        }
+                    }
+                    
+                    localStorage.setItem('tivityframe_thoughts', JSON.stringify(thoughts));
+                    updateStats();
+                    loadHistory();
+                    
+                    thoughtInput.value = '';
+                    dynamicPrompt.textContent = editingId ? "Thought updated successfully!" : "Thought saved successfully!";
+                }
+            }
+            
+            // Create background bubbles
+            function createBubbles() {
+                const bubblesContainer = document.querySelector('.bubbles');
+                for (let i = 0; i < 6; i++) {
+                    const size = Math.floor(Math.random() * 80) + 40;
+                    const top = Math.floor(Math.random() * 100);
+                    const left = Math.floor(Math.random() * 100);
+                    const delay = Math.floor(Math.random() * 5);
+                    
+                    const bubble = document.createElement('div');
+                    bubble.className = 'bubble';
+                    bubble.style.width = `${size}px`;
+                    bubble.style.height = `${size}px`;
+                    bubble.style.top = `${top}%`;
+                    bubble.style.left = `${left}%`;
+                    bubble.style.animationDelay = `${delay}s`;
+                    
+                    bubblesContainer.appendChild(bubble);
+                }
+            }
+            
+            // Initialize with sample thoughts if empty
+            if (thoughts.length === 0) {
+                thoughts = [
+                    {
+                        id: 1,
+                        date: "Today, 10:30 AM",
+                        content: "Need to prioritize tasks for the upcoming project deadline",
+                        tags: ["work"],
+                        resolved: false
+                    },
+                    {
+                        id: 2,
+                        date: "Yesterday, 4:15 PM",
+                        content: "Had an idea for improving our team collaboration process",
+                        tags: ["idea"],
+                        resolved: false
+                    }
+                ];
+                thoughtId = 3;
+                statsData = {
+                    total: 2,
+                    resolved: 0,
+                    insights: 0
+                };
+            }
+        });
+    </script>
+</body>
+</html>
